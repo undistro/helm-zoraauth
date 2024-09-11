@@ -1,5 +1,5 @@
 name: "zoraauth"
-version: "0.1.0"
+version: "0.2.0"
 usage: "Handle Device Authorization Workflow on behalf of Zora Operator"
 description: "Handle Device Authorization Workflow on behalf of Zora Operator"
 command: "$HELM_PLUGIN_DIR/bin/zoraauth"
