@@ -26,13 +26,21 @@ type DeviceCodeResponse struct {
 
 // Struct to parse the token response
 type TokenResponse struct {
-	AccessToken  string `json:"access_token" yaml:"access_token"`
-	RefreshToken string `json:"refresh_token" yaml:"refresh_token"`
-	TokenType    string `json:"token_type" yaml:"token_type"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	TokenType    string `json:"token_type"`
+}
+
+type TokenData struct {
+	Domain       string `yaml:"domain"`
+	ClientID     string `yaml:"clientId"`
+	AccessToken  string `yaml:"accessToken"`
+	RefreshToken string `yaml:"refreshToken"`
+	TokenType    string `yaml:"tokenType"`
 }
 
 type ZoraAuthResponse struct {
-	ZoraAuth *TokenResponse `json:"zoraauth" yaml:"zoraauth"`
+	ZoraAuth *TokenData `json:"zoraauth" yaml:"zoraauth"`
 }
 
 // Function to request the device code
@@ -64,7 +72,7 @@ func requestDeviceCode(domain, clientID, audience string) (*DeviceCodeResponse, 
 }
 
 // Function to poll for token
-func pollForToken(domain, clientID, deviceCode string, interval, expiresIn int) (*TokenResponse, error) {
+func pollForToken(domain, clientID, deviceCode string, interval, expiresIn int) (*TokenData, error) {
 	url := fmt.Sprintf("https://%s/oauth/token", domain)
 	data := fmt.Sprintf("client_id=%s&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=%s", clientID, deviceCode)
 
@@ -89,8 +97,14 @@ func pollForToken(domain, clientID, deviceCode string, interval, expiresIn int) 
 			if err := json.Unmarshal(body, &tokenResponse); err != nil {
 				return nil, fmt.Errorf("failed to parse JSON response: %w", err)
 			}
-
-			return &tokenResponse, nil
+			tokenData := TokenData{
+				Domain:       domain,
+				ClientID:     clientID,
+				AccessToken:  tokenResponse.AccessToken,
+				RefreshToken: tokenResponse.RefreshToken,
+				TokenType:    tokenResponse.TokenType,
+			}
+			return &tokenData, nil
 		}
 	}
 
@@ -98,7 +112,7 @@ func pollForToken(domain, clientID, deviceCode string, interval, expiresIn int) 
 }
 
 // Function to write token information to a YAML file
-func writeTokensToYaml(filename string, tokens *TokenResponse) error {
+func writeTokensToYaml(filename string, tokens *TokenData) error {
 	oauth := ZoraAuthResponse{tokens}
 	yamlData, err := yaml.Marshal(oauth)
 	if err != nil {
