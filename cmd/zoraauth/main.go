@@ -46,7 +46,7 @@ type ZoraAuthResponse struct {
 // Function to request the device code
 func requestDeviceCode(domain, clientID, audience string) (*DeviceCodeResponse, error) {
 	url := fmt.Sprintf("https://%s/oauth/device/code", domain)
-	data := fmt.Sprintf("client_id=%s&scope=profile%%20email%%20offline_access&audience=%s", clientID, audience)
+	data := fmt.Sprintf("client_id=%s&scope=profile%%20email%%20offline_access%%20openid&audience=%s", clientID, audience)
 
 	resp, err := http.Post(url, "application/x-www-form-urlencoded", bytes.NewBufferString(data))
 	if err != nil {
